@@ -2,7 +2,7 @@ import app from './config/express';
 import { addProduct, deleteProduct, listProducts, updateProduct } from './controllers/productController';
 import { addItemToCart, viewCart, removeItemFromCart } from './controllers/cartController';
 import { listUsers, registerUser, loginUser } from './controllers/userController';
-import { completeSale } from './controllers/salesController';
+import { completeSale, getSalesHistory } from './controllers/salesController';
 
 const port = 3000;
 
@@ -22,7 +22,10 @@ app.get('/api/users', listUsers);
 app.post('/api/cadastro', registerUser);
 app.post('/api/login', loginUser);
 
+
+//sales
 app.post('/api/sales/complete/:userId', completeSale);
+app.get('/api/sales/history/:userId', getSalesHistory);
 
 app.listen(port, () => {
     console.log(`Servidor iniciado na porta ${port}`);

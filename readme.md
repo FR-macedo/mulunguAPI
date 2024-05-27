@@ -8,6 +8,7 @@ Esta é uma API para um sistema de e-commerce, desenvolvida com Node.js e TypeSc
 - **body-parser**: Middleware para fazer o parsing dos corpos das requisições HTTP.
 - **mongodb**: Cliente MongoDB para Node.js.
 - **cors**: Middleware para habilitar o CORS (Cross-Origin Resource Sharing).
+- **nodemailer**: O Nodemailer simplifica o processo de envio de e-mails, fornecendo uma API intuitiva e fácil de usar.
 
 ## Estrutura do Projeto
 O projeto está estruturado da seguinte forma:

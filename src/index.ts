@@ -1,32 +1,47 @@
-import app from './config/express';
-import { addProduct, deleteProduct, listProducts, updateProduct } from './controllers/productController';
+import express from 'express';
+import { registerUser, loginUser, authenticateToken } from './controllers/authController';
 import { addItemToCart, viewCart, removeItemFromCart } from './controllers/cartController';
-import { listUsers, registerUser, loginUser } from './controllers/userController';
-import { completeSale, getSalesHistory } from './controllers/salesController';
+import { addProduct, deleteProduct, listProducts, updateProduct } from './controllers/productController';
+import { MongoClient } from 'mongodb';
+import { uri} from './config/database';
 
+
+const app = express();
 const port = 3000;
 
-//products
-app.post('/api/products', addProduct);
-app.delete('/api/products/:id', deleteProduct);
-app.get('/api/products', listProducts);
-app.put('/api/products/:id', updateProduct);
+// Middleware para lidar com JSON e URL encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-//cart
-app.post('/api/cart/add', addItemToCart);
-app.get('/api/cart/:userId', viewCart);
-app.delete('/api/cart/remove/:userId/:productId', removeItemFromCart);
+// Definindo as rotas
 
-//users
-app.get('/api/users', listUsers);
-app.post('/api/cadastro', registerUser);
-app.post('/api/login', loginUser);
+// Rotas de autenticação
+app.post('/register', registerUser);
+app.post('/login', loginUser);
 
+// Rotas do carrinho
+app.post('/cart', authenticateToken, addItemToCart);
+app.get('/cart', authenticateToken, viewCart);
+app.delete('/cart/:productId', authenticateToken, removeItemFromCart);
 
-//sales
-app.post('/api/sales/complete/:userId', completeSale);
-app.get('/api/sales/history/:userId', getSalesHistory);
+// Rotas de vendas
+// app.post('/sales', authenticateToken, completeSale);
+// app.get('/sales/history', authenticateToken, getSalesHistory);
 
-app.listen(port, () => {
-    console.log(`Servidor iniciado na porta ${port}`);
+// Rotas de produtos
+app.post('/products', authenticateToken, addProduct);
+app.delete('/products/:id', authenticateToken, deleteProduct);
+app.get('/products', listProducts);
+app.put('/products/:id', authenticateToken, updateProduct); 
+
+// Configuração do servidor
+const client = new MongoClient(uri);
+
+app.listen(port, async () => {
+    try {
+        await client.connect();
+        console.log(`Server is listening on port ${port}`);
+    } catch (error) {
+        console.error('Error while connecting to the database:', error);
+    }
 });

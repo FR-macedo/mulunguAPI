@@ -1,19 +1,21 @@
-// src/controllers/cartController.ts
-
 import { Request, Response } from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import { uri, dbName, cartCollectionName, collectionName } from '../config/database';
+import { RequestHandler } from 'express';
+import { User } from '../types/types';
+
+const client = new MongoClient(uri);
 
 // Adicionar Item ao Carrinho
 export const addItemToCart = async (req: Request, res: Response) => {
-    const client = new MongoClient(uri);
-
     try {
         await client.connect();
         const database = client.db(dbName);
         const productsCollection = database.collection(collectionName);
         const cartCollection = database.collection(cartCollectionName);
-        const { userId, productId, quantity } = req.body;
+        const { productId, quantity } = req.body;
+
+        const userId = req.user?.userId; // Obter userId do token
 
         if (!ObjectId.isValid(productId) || !Number.isInteger(quantity) || quantity <= 0) {
             return res.status(400).json({ error: "Dados inválidos" });
@@ -40,15 +42,13 @@ export const addItemToCart = async (req: Request, res: Response) => {
 
 // Visualizar Carrinho do Usuário
 export const viewCart = async (req: Request, res: Response) => {
-    const client = new MongoClient(uri);
-
     try {
         await client.connect();
         const database = client.db(dbName);
         const cartCollection = database.collection(cartCollectionName);
         const productsCollection = database.collection(collectionName);
 
-        const userId = req.params.userId;
+        const userId = req.user?.userId; // Obter userId do token
 
         const items = await cartCollection.find({ userId: new ObjectId(userId) }).toArray();
         const cart = [];
@@ -78,36 +78,24 @@ export const viewCart = async (req: Request, res: Response) => {
 
 // Remover Quantidade Específica do Item do Carrinho do Usuário
 export const removeItemFromCart = async (req: Request, res: Response) => {
-    const client = new MongoClient(uri);
-
     try {
         await client.connect();
         const database = client.db(dbName);
         const cartCollection = database.collection(cartCollectionName);
-        const { userId, productId } = req.params;
-        const quantityToRemove = parseInt(req.query.quantityToRemove as string, 10); // Converter para número
+        const { productId } = req.params;
 
-        if (isNaN(quantityToRemove) || quantityToRemove <= 0) {
-            return res.status(400).json({ error: "Quantidade inválida a ser removida" });
+        const userId = req.user?.userId; // Obter userId do token
+
+        if (!ObjectId.isValid(productId)) {
+            return res.status(400).json({ error: "ID do produto inválido" });
         }
 
-        const item = await cartCollection.findOne({ userId: new ObjectId(userId), productId: new ObjectId(productId) });
-        if (!item) {
-            return res.status(404).json({ error: "Item não encontrado no carrinho" });
+        const result = await cartCollection.deleteOne({ userId: new ObjectId(userId), productId: new ObjectId(productId) });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Produto não encontrado no carrinho do usuário" });
         }
 
-        const newQuantity = item.quantity - quantityToRemove;
-
-        if (newQuantity <= 0) {
-            await cartCollection.deleteOne({ userId: new ObjectId(userId), productId: new ObjectId(productId) });
-        } else {
-            await cartCollection.updateOne(
-                { userId: new ObjectId(userId), productId: new ObjectId(productId) },
-                { $set: { quantity: newQuantity } }
-            );
-        }
-
-        res.json({ message: `Quantidade removida do carrinho com sucesso para o produto ${productId}` });
+        res.json({ message: "Produto removido do carrinho com sucesso" });
     } catch (error) {
         console.error('Erro ao remover item do carrinho:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });

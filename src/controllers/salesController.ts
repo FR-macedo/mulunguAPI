@@ -1,34 +1,34 @@
 import { Request, Response } from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import nodemailer from 'nodemailer';
-import {Sale, SaleItem} from "../types/types"
+import { Sale, SaleItem } from "../types/types"
+import { uri, dbName, cartCollectionName, salesCollectionName, userCollectionName, collectionName } from '../config/database';
+import { RequestHandler } from 'express';
+import { User } from '../types/types'; // Importar a interface User
+import { authenticateToken } from './authController'; // Importar a função de autenticação
 
-const uri = 'mongodb://localhost:27017';
-const dbName = 'TurminhaDoAgro';
-const cartCollectionName = 'carrinho';
-const collectionName = 'products';
-const userCollectionName = 'user';
 const client = new MongoClient(uri);
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'estephani.germana@gmail.com',
-        pass: 'tdup byzz bnbe regj'
+        user: 'seu_email@gmail.com',
+        pass: 'sua_senha'
     }
 });
 
 // Concluir uma venda para um usuário específico
-export const completeSale = async (req: Request, res: Response) => {
-    const { userId } = req.params;
+export const completeSale = async (req: Request & { user: User }, res: Response) => { // Adicionar tipagem para req.user
     const { paymentMethod } = req.body;
 
     try {
+        const userId = req.user.userId; // Obter userId do token
+
         await client.connect();
         const database = client.db(dbName);
         const cartCollection = database.collection(cartCollectionName);
         const productsCollection = database.collection(collectionName);
-        const salesCollection = database.collection('sales');
+        const salesCollection = database.collection(salesCollectionName);
         const userCollection = database.collection(userCollectionName);
 
         const items = await cartCollection.find({ userId: new ObjectId(userId) }).toArray();
@@ -77,8 +77,6 @@ export const completeSale = async (req: Request, res: Response) => {
         const result = await salesCollection.insertOne(sale);
         await cartCollection.deleteMany({ userId: new ObjectId(userId) });
 
-        const postmanMessage = `Olá ${user.nome}, Sua compra foi realizada com sucesso. Detalhes da compra: ${saleDetails.map(item => `${item.productName}, R$${item.price.toFixed(2)}, Pagamento: ${paymentMethod}`).join('\n')} Obrigado por comprar com a TurminhaDoAgro!`;
-
         const emailMessage = `Olá ${user.nome}, espero que esteja bem!!\n\nSua compra foi realizada com sucesso! Já vamos preparar seu pedido para envio.\n\nDetalhes da compra:\nVocê adquiriu o(s) produto(s):\n${saleDetails.map(item => `${item.productName}`).join(', ')}\nValor: R$${saleDetails.reduce((acc, item) => acc + item.price, 0).toFixed(2)}\nMétodo de Pagamento: ${paymentMethod}\n\nObrigado por comprar com a TurminhaDoAgro!`;
 
         const mailOptions = {
@@ -95,7 +93,7 @@ export const completeSale = async (req: Request, res: Response) => {
             } else {
                 console.log('Email enviado:', info.response);
                 res.json({
-                    message: postmanMessage,
+                    message: 'Compra realizada com sucesso',
                     saleId: result.insertedId
                 });
             }
@@ -103,12 +101,14 @@ export const completeSale = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Erro ao concluir a venda:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
+    } finally {
+        await client.close();
     }
 };
 
 // Obter o histórico de compras de um usuário
-export const getSalesHistory = async (req: Request, res: Response) => {
-    const { userId } = req.params;
+export const getSalesHistory = async (req: Request & { user: User }, res: Response) => { // Adicionar tipagem para req.user
+    const userId = req.user.userId; // Obter userId do token
 
     try {
         await client.connect();
@@ -133,5 +133,7 @@ export const getSalesHistory = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Erro ao obter o histórico de compras:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
-    } 
+    } finally {
+        await client.close();
+    }
 };

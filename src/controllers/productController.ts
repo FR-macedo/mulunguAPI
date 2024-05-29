@@ -1,8 +1,8 @@
-// src/controllers/productController.ts
-
 import { Request, Response } from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import { uri, dbName, collectionName } from '../config/database';
+import { RequestHandler } from 'express';
+import { authenticateToken } from './authController';
 
 // Adicionar Produto
 export const addProduct = async (req: Request, res: Response) => {
@@ -81,7 +81,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         const result = await collection.findOneAndUpdate(
             { _id: new ObjectId(productId) },
             { $set: updatedProduct },
-            { returnDocument: 'after' } // Corrigido para 'returnDocument'
+            { returnDocument: 'after' }
         );
 
         const updatedDocument = result ? result.value : null;

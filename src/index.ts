@@ -2,6 +2,7 @@ import express from 'express';
 import { registerUser, loginUser, authenticateToken } from './controllers/authController';
 import { addItemToCart, viewCart, removeItemFromCart } from './controllers/cartController';
 import { addProduct, deleteProduct, listProducts, updateProduct } from './controllers/productController';
+import { completeSale, getSalesHistory } from './controllers/salesController';
 import { MongoClient } from 'mongodb';
 import { uri} from './config/database';
 

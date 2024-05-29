@@ -2,18 +2,21 @@ import { Request, Response } from 'express';
 import { MongoClient, ObjectId } from 'mongodb'
 
 export interface SaleItem {
+    productId: ObjectId;
     productName: string;
     quantity: number;
     price: number;
-}
-
-export interface Sale {
-    _id: ObjectId;
+  }
+  
+  export interface Sale {
+    _id?: ObjectId;
     userId: ObjectId;
+    userName: string;
+    userEmail: string;
     timestamp: Date;
     items: SaleItem[];
     paymentMethod: string;
-}
+  }
 
 // Interface do usuário
 export interface User {

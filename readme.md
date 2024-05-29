@@ -25,24 +25,157 @@ O projeto está estruturado da seguinte forma:
 ## Endpoints
 
 ### Produtos
-- **POST /api/products**: Adiciona um novo produto.
-- **GET /api/products**: Retorna todos os produtos.
-- **GET /api/products/:id**: Retorna um produto específico pelo ID.
-- **PUT /api/products/:id**: Atualiza um produto existente pelo ID.
-- **DELETE /api/products/:id**: Exclui um produto pelo ID.
+- **POST /products:** Adiciona um novo produto.
+- **GET /products:** Retorna todos os produtos.
+- **GET /products:** Retorna um produto específico pelo ID.
+- **PUT /products:** Atualiza um produto existente pelo ID.
+- **DELETE /products:** Exclui um produto pelo ID.
 
 ### Usuários
-- **GET /api/users**: Retorna todos os usuários.
-- **POST /api/register**: Registra um novo usuário.
-- **POST /api/login**: Realiza o login de um usuário.
+- **GET /users:** Retorna todos os usuários.
+- **POST /register:** Registra um novo usuário.
+- **POST /login:** Realiza o login de um usuário.
 
 ### Carrinho
-- **POST /api/cart/add**: Adiciona um item ao carrinho de um usuário.
-- **GET /api/cart/:userId**: Retorna o carrinho de um usuário.
-- **DELETE /api/cart/remove/:userId/:productId**: Remove uma quantidade específica de um item do carrinho de um usuário.
+- **POST /cart/: Adiciona um item ao carrinho de um usuário.
+- **GET //cart/: Retorna o carrinho de um usuário.
+- **DELETE /cart/: Remove uma quantidade específica de um item do carrinho de um usuário.
 
-### Vendas
-- **POST /api/sales/complete/:userId**: Completa uma venda para um usuário específico.
+###  COMO CRIAR OS REQUESTS
+
+## Rotas para autenticação
+
+- **POST http://localhost:3000//register**
+
+```
+header:
+
+Content-Type - application/json
+
+{
+    "nome": "Nome do Usuário",
+    "email": "email@exemplo.com",
+    "senha": "senhaSegura"
+}
+```
+
+- **POST http://localhost:3000//login**
+
+```
+header:
+
+Content-Type - application/json
+
+{
+    "email": "email@exemplo.com",
+    "senha": "senhaSegura"
+}
+```
+
+## Rotas para produtos
+
+- **POST http://localhost:3000//products**
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+Content-Type - application/json
+
+{
+  "name": "Boneco do kaka",
+  "description": "um boneco em tamanho real do kaka (baterias inclusas)",
+  "price": 100.0,
+  "stock": 50
+}
+```
+
+- **PUT http://localhost:3000//products/productId**
+
+- substitua o "/productId" pelo id do produto que será deletado 
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+Content-Type: application/json
+
+body:
+{
+  "name": "Nome Atualizado do Produto",
+  "description": "Descrição Atualizada do Produto",
+  "price": 150.0,
+  "stock": 30
+} 
+```
+
+- **DELETE http://localhost:3000//products/productId**
+
+- substitua o "/productId" pelo id do produto que será deletado 
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+
+```
+
+## Rotas para o carrinho
+
+- **POST http://localhost:3000//cart**
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+content-type -application/json
+
+body:
+
+{
+  "productId": "ID_DO_PRODUTO",
+  "quantity": 1
+}
+```
+
+- **GET http://localhost:3000//cart**
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+
+
+```
+
+
+- **DELETE http://localhost:3000//cart/productId**
+
+- substitua o "/productId" pelo id do produto que será deletado 
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+
+```
+
+- **POST http://localhost:3000//cart**
+
+```
+header: 
+
+authorization - bearer tokem = token gerado ao fazer o login do usuário
+content-type -application/json
+
+body:
+
+{
+  "productId": "ID_DO_PRODUTO",
+  "quantity": 1
+}
+```
+
 
 ## Licença
 Este projeto está licenciado sob a [MIT License](LICENSE).

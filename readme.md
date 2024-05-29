@@ -160,21 +160,6 @@ authorization - bearer tokem = token gerado ao fazer o login do usuário
 
 ```
 
-- **POST http://localhost:3000//cart**
-
-```
-header: 
-
-authorization - bearer tokem = token gerado ao fazer o login do usuário
-content-type -application/json
-
-body:
-
-{
-  "productId": "ID_DO_PRODUTO",
-  "quantity": 1
-}
-```
 
 
 ## Licença
